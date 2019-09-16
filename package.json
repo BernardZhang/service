@@ -1,5 +1,5 @@
 {
-  "name": "service",
+  "name": "lib-service",
   "version": "0.1.0",
   "description": "create services by json config",
   "main": "lib/index.js",
