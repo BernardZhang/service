@@ -33,17 +33,21 @@ export const getFullUrl = url => {
 
 export const buildURL = (config, params = {}) => {
 	let { url, method } = config;
-	method = method || 'GET';
+    method = method || 'GET';
 
     url = getFullUrl(url);
-	
+    // 替换url中动态参数如: /users/{id} => /users/1
+    url = url.replace(/{([^}]*)}/g, (str, key) => params[key]);
+    // 替换url中动态参数如: /users/:id => /users/1
+    url = url.replace(/\/:([^/]*)/g, (str, key) => params[key]);
+
 	if (method === 'GET') {
 		url = new URL(url);
 		url.search = new URLSearchParams(removeEmptyKey(params));
 		return url.href;
-	} else {
-		return url.replace(/{([^}]*)}/g, (str, key) => params[key]);
-	}
+    }
+
+    return url;
 };
 
 /**
@@ -133,7 +137,7 @@ export const createServices = (config, options = {}) => {
                 buildURL(config[key], params),
                 generateOptions(config[key], params)
             ).then(response => response.json());
-            
+
 			if (interceptors && interceptors.length) {
 				promise = addInterceptors(promise, interceptors, url);
             }
@@ -149,7 +153,7 @@ export const createServices = (config, options = {}) => {
                 }
             }).finally(() => {
                 const { errorHandle } = options;
-                promise.catch(errorHandle || onError || (err => {
+                promise.catch(onError || errorHandle || (err => {
                     console.warn(`request ${url} exception`, err);
 				    // message.error(err.message || '服务器未知错误');
 				    return;
