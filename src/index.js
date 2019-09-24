@@ -3,6 +3,7 @@
  * @author zhangyou
  */
 import { stringify } from 'query-string';
+import jsonToFormData from 'json-form-data';
 
 
 const { protocol, host } = window.location;
@@ -103,11 +104,12 @@ export const generateOptions = (options, params) => {
         }
 
         if (dataType === 'formdata') {
-            const fd = new FormData();
-            Object.keys(params).map(key => {
-                fd.append(key, params[key]);
-            });
-            return fd;
+            return jsonToFormData(params);
+            // const fd = new FormData();
+            // Object.keys(params).map(key => {
+            //     fd.append(key, params[key]);
+            // });
+            // return fd;
         }
 
         return stringify(params);
