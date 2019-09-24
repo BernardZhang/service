@@ -9,6 +9,7 @@ const { protocol, host } = window.location;
 const globalConfig = {
     baseUrl: '/api',
     redirectUrl: '/login/logout',
+    dataType: 'formdata',
     onError: err => {
         // message.error(err.message || '服务器未知错误');
         console.error(err.message || err.msg || '服务器未知错误')
@@ -39,7 +40,8 @@ export const buildURL = (config, params = {}) => {
     // 替换url中动态参数如: /users/{id} => /users/1
     url = url.replace(/{([^}]*)}/g, (str, key) => params[key]);
     // 替换url中动态参数如: /users/:id => /users/1
-    url = url.replace(/\/:([^/]*)/g, (str, key) => params[key]);
+    url = url.replace(/\/:([^/]*)/g, (str, key) => `/${params[key]}`);
+    console.log(url);
 
 	if (method === 'GET') {
 		url = new URL(url);
@@ -90,20 +92,29 @@ export const generateOptions = (options, params) => {
         credentials: 'include',
         method: method.toUpperCase()
     };
+    const dataType = options.dataType || globalConfig.dataType;
     const formatBody = (options, params) => {
-        if (options.dataType === 'json') {
+        if (params instanceof FormData) {
+            return params;
+        }
+
+        if (dataType === 'json') {
             return JSON.stringify(params);
         }
 
-        if (params instanceof FormData) {
-            return params;
+        if (dataType === 'formdata') {
+            const fd = new FormData();
+            Object.keys(params).map(key => {
+                fd.append(key, params[key]);
+            });
+            return fd;
         }
 
         return stringify(params);
     };
 
     if (method.toUpperCase() !== 'GET') {
-        if (options.dataType === 'json') {
+        if (dataType === 'json') {
             Object.assign(resultOptions, {
                 headers: {
                     'Content-Type': 'application/json'
