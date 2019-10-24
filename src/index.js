@@ -4,18 +4,11 @@
  */
 import { stringify } from 'query-string';
 import jsonToFormData from 'json-form-data';
+import checkStatus from './checkStatus';
+import globalConfig from './config';
 
 
 const { protocol, host } = window.location;
-const globalConfig = {
-    baseUrl: '/api',
-    redirectUrl: '/login/logout',
-    dataType: 'formdata',
-    onError: err => {
-        // message.error(err.message || '服务器未知错误');
-        console.error(err.message || err.msg || '服务器未知错误')
-    }
-};
 
 export const removeEmptyKey = (params = {}) => {
 	for (const key in params) {
@@ -149,7 +142,7 @@ export const createServices = (config, options = {}) => {
 			let promise = fetch(
                 buildURL(config[key], params),
                 generateOptions(config[key], params)
-            ).then(response => response.json());
+            ).then(res => checkStatus(res, globalConfig)).then(response => response.json());
 
 			if (interceptors && interceptors.length) {
 				promise = addInterceptors(promise, interceptors, url);
