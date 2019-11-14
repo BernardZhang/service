@@ -142,7 +142,7 @@ export const createServices = (config, options = {}) => {
 			let promise = fetch(
                 buildURL(config[key], params),
                 generateOptions(config[key], params)
-            ).then(res => checkStatus(res, globalConfig)).then(response => response.json());
+            ).then(res => checkStatus(res, globalConfig)).then(response => response.json instanceof Function ? response.json() : response);
 
 			if (interceptors && interceptors.length) {
 				promise = addInterceptors(promise, interceptors, url);

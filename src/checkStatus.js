@@ -35,6 +35,7 @@ export default (response, config) => {
 		}).catch(err => {
 			statusHandle(response, err);
 		});
+
 		return error;
 	} else {
 		throw error;
