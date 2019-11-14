@@ -27,8 +27,14 @@ export default (response, config) => {
     error.status = response.status;
 	error.response = response;
 
-	if (error.status === 401) {
-		config[error.status] && config[error.status]();
+	const statusHandle = config[error.status];
+
+	if (statusHandle && statusHandle instanceof Function) {
+		response.json().then(res => {
+			statusHandle(res);
+		}).catch(err => {
+			statusHandle(response, err);
+		});
 		return error;
 	} else {
 		throw error;

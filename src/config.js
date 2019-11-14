@@ -7,4 +7,4 @@ export default {
         // message.error(err.message || '服务器未知错误');
         console.error(err.message || err.msg || '服务器未知错误')
     }
-};;
+};
