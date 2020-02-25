@@ -17,7 +17,6 @@ const codeMessage = {
 };
 
 export default (response, config) => {
-    console.log('checkStatus', response);
     if (response.status >= 200 && response.status < 300) {
 		return response;
 	}

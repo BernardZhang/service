@@ -1,7 +1,7 @@
 export default {
     baseUrl: '/api',
     redirectUrl: '/login/logout',
-    dataType: 'formdata',
+    dataType: 'formdata', // json、formdata
     401: () => {},
     onError: err => {
         // message.error(err.message || '服务器未知错误');

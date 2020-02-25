@@ -5,52 +5,17 @@
 import { stringify } from 'query-string';
 import jsonToFormData from 'json-form-data';
 import checkStatus from './checkStatus';
-import globalConfig from './config';
+import { getFullUrl, buildURL } from './utils';
+import defaultConfig from './config';
 
-
-const { protocol, host } = window.location;
-
-export const removeEmptyKey = (params = {}) => {
-	for (const key in params) {
-		if (typeof params[key] === 'undefined') {
-			delete params[key];
-		}
-	}
-	return params;
-};
-
-export const getFullUrl = url => {
-	if (!/^http/i.test(url)) {
-		url = `${protocol}//${host}${globalConfig.baseUrl}${url}`;
-	}
-	return url;
-};
-
-export const buildURL = (config, params = {}) => {
-	let { url, method } = config;
-    method = method || 'GET';
-
-    url = getFullUrl(url);
-    // 替换url中动态参数如: /users/{id} => /users/1
-    url = url.replace(/{([^}]*)}/g, (str, key) => params[key]);
-    // 替换url中动态参数如: /users/:id => /users/1
-    url = url.replace(/\/:([^/]*)/g, (str, key) => `/${params[key]}`);
-    console.log(url);
-
-	if (method === 'GET') {
-		url = new URL(url);
-		url.search = new URLSearchParams(removeEmptyKey(params));
-		return url.href;
-    }
-
-    return url;
-};
 
 /**
  * 给请求添加拦截器
  * @param {Promise} promise 请求promise实例
  * @param {Array} interceptors 拦截器数组
  * @param {String} url 当前请求的地址
+ * 
+ * @return {Promise} 返回添加拦截器后新的promise对象
  */
 export const addInterceptors = (promise, interceptors, url) => {
 	interceptors.forEach(interceptor => {
@@ -76,7 +41,7 @@ export const addInterceptors = (promise, interceptors, url) => {
  * 
  * @return {Object} 最终发送请求的options对象 
  */
-export const generateOptions = (options, params) => {
+export const generateOptions = (options, params, globalConfig = defaultConfig) => {
     const {
         url,
         method = 'GET',
@@ -124,9 +89,19 @@ export const generateOptions = (options, params) => {
     return resultOptions;
 };
 
-export const createServices = (config, options = {}) => {
+/**
+ * 依据json配置生成services 方法集合对象
+ *
+ * @param {Object} config 接口方法配置对象
+ * @param {Object} options 额外配置，如： { intercepters: [] }
+ * @param {Object} globalConfig 全局配置对象，如错误处理(onError)、baseUrl、请求报文类型(dataType: formdata, json)
+ * 
+ * @return {Object} 接口方法对象如： { getUsers: params => { ... }, ...}
+ */
+export const createServices = (config, options = {}, globalConfig = defaultConfig) => {
     const services = {};
     const {
+        baseUrl = '', 
         redirectUrl,
         onError
     } = globalConfig;
@@ -140,9 +115,13 @@ export const createServices = (config, options = {}) => {
 
 		services[key] = params => {
 			let promise = fetch(
-                buildURL(config[key], params),
-                generateOptions(config[key], params)
-            ).then(res => checkStatus(res, globalConfig)).then(response => response.json instanceof Function ? response.json() : response);
+                buildURL(config[key], params, baseUrl),
+                generateOptions(config[key], params, globalConfig)
+            ).then(
+                res => checkStatus(res, globalConfig)
+            ).then(
+                response => response.json instanceof Function ? response.json() : response
+            );
 
 			if (interceptors && interceptors.length) {
 				promise = addInterceptors(promise, interceptors, url);
@@ -188,13 +167,25 @@ export const createServices = (config, options = {}) => {
         
             return promise;
         };
-        services[key].URL = new URL(getFullUrl(url));
+        services[key].URL = new URL(getFullUrl(url, baseUrl));
 	}
 
 	return services;
 };
 
-export default config => {
-    Object.assign(globalConfig, config);
-    return createServices;
-};
+/**
+ * 设置全局配置，并返回createServices方法
+ *
+ * @param {Object} globalConfig 全局配置会与defaultConfig进行merge
+ * 
+ * @return {Function} 返回createServices方法
+ */
+export default globalConfig => (
+    (config = {}, options = {}) => (
+        createServices(
+            config,
+            options,
+            Object.assign({}, defaultConfig, globalConfig)
+        )
+    )
+);
