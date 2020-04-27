@@ -45,6 +45,7 @@ export const generateOptions = (options, params, globalConfig = defaultConfig) =
     const {
         url,
         method = 'GET',
+        headers = {},
         ...rest
     } = options;
     const resultOptions = {
@@ -85,6 +86,14 @@ export const generateOptions = (options, params, globalConfig = defaultConfig) =
         
         resultOptions.body = formatBody(resultOptions, params);
     }
+
+    Object.assign(resultOptions, {
+        headers: {
+            ...(resultOptions.headers || {}),
+            ...(globalConfig.headers || {}),
+            ...headers
+        }
+    });
 
     return resultOptions;
 };
