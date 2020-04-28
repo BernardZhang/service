@@ -117,7 +117,14 @@ export const createServices = (config, options = {}, globalConfig = defaultConfi
 	let {
 		interceptors = []
 	} = options;
-	interceptors = interceptors instanceof Array ?  interceptors : [interceptors];
+    interceptors = interceptors instanceof Array ?  interceptors : [interceptors];
+    
+    if (globalConfig.interceptors) {
+        interceptors = [
+            globalConfig.interceptors,
+            ...interceptors
+        ];
+    }
 
 	for (const key in config) {
         const { url } = config[key];
