@@ -75,14 +75,19 @@ export const generateOptions = (options, params, globalConfig = defaultConfig) =
     };
 
     if (method.toUpperCase() !== 'GET') {
-        if (dataType === 'json') {
-            Object.assign(resultOptions, {
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                ...rest
-            });
-        }
+        const defaultHeaders = {
+            json: {
+                'Content-Type': 'application/json'
+            },
+            'x-www-form-urlencoded': {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        }[dataType] || {};
+
+        Object.assign(resultOptions, {
+            headers: defaultHeaders,
+            ...rest
+        });
         
         resultOptions.body = formatBody(resultOptions, params);
     }
