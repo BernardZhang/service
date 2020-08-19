@@ -25,7 +25,6 @@ export const buildURL = (config, params = {}, baseUrl = "") => {
     url = url.replace(/{([^}]*)}/g, (str, key) => params[key]);
     // 替换url中动态参数如: /users/:id => /users/1
     url = url.replace(/\/:([^/]*)/g, (str, key) => `/${params[key]}`);
-    console.log(url);
 
 	if (method === 'GET') {
 		url = new URL(url);
