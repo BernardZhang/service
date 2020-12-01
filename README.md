@@ -23,7 +23,7 @@ const createService = service({
         csrfToken: 'csrf_token'
     },
     // 全局拦截器
-    intercepters: res => ({
+    interceptors: res => ({
         success: res.code === 200,
         data: res.result
     }),
@@ -99,14 +99,14 @@ userService.remove({ id: 1 });
 #### 拦截器interceptors配置
 interceptors主要是用来对Response数据做数据处理和转换的，什么时候需要用到interceptors配置？
 - 在服务端Response的数据骨架结构，不符合service内定义的通用数据骨架结构时，可以使用全局拦截器对所有Response数据进行转换。
-- 对部分特定的接口需要做一些Response数据转换或处理时，可以使用局部拦截器配置，局部拦截器配置，可支持精确和正则匹配请求pathname,来决定对应请求是否使用intercepter
+- 对部分特定的接口需要做一些Response数据转换或处理时，可以使用局部拦截器配置，局部拦截器配置，可支持精确和正则匹配请求pathname,来决定对应请求是否使用interceptor
 
 ```js
 import service from 'lib-service';
 
 const createService = service({
     // 全局拦截器，凡是用 createService方法创建的服务都会支持这个拦截器
-    intercepters: res => ({
+    interceptors: res => ({
         success: res.code === 200,
         data: res.result
     }),

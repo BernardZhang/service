@@ -107,7 +107,7 @@ export const generateOptions = (options, params, globalConfig = defaultConfig) =
  * 依据json配置生成services 方法集合对象
  *
  * @param {Object} config 接口方法配置对象
- * @param {Object} options 额外配置，如： { intercepters: [] }
+ * @param {Object} options 额外配置，如： { interceptors: [] }
  * @param {Object} globalConfig 全局配置对象，如错误处理(onError)、baseUrl、请求报文类型(dataType: formdata, json)
  * 
  * @return {Object} 接口方法对象如： { getUsers: params => { ... }, ...}
@@ -142,7 +142,7 @@ export const createServices = (config, options = {}, globalConfig = defaultConfi
                 res => checkStatus(res, globalConfig)
             ).then(
                 response => {
-                    const contentType = response.headers.get('content-type');
+                    const contentType = response?.headers?.get('content-type');
 
                     if (contentType && contentType.indexOf('application/json') > -1) {
                         return response.json();

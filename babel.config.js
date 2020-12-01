@@ -14,7 +14,13 @@ const plugins = [
     //     {
     //         loose: true
     //     }
-    // ]
+    // ],
+    [
+        '@babel/plugin-proposal-optional-chaining',
+        {
+            loose: true
+        }
+    ]
 ];
 
 module.exports = {presets, plugins};

@@ -20,8 +20,8 @@ export default (response, config) => {
     if (response.status >= 200 && response.status < 300) {
 		return response;
 	}
-	const errortext = codeMessage[response.status] || response.statusText;
-	const error = new Error(errortext);
+	const errorMsg = codeMessage[response.status] || response.statusText;
+	const error = new Error(errorMsg);
     error.name = response.status;
     error.status = response.status;
 	error.response = response;
