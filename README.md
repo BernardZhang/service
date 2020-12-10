@@ -17,7 +17,7 @@ import service from 'lib-service';
 const createService = service({
     baseUrl: '/api',
     redirectUrl: '/login/logout',
-    dataType: 'json', // json、formdata, 默认是formdata
+    dataType: 'json', // json、formdata、x-www-form-urlencoded, 默认是formdata
     // request headers
     headers: {
         csrfToken: 'csrf_token'
@@ -88,7 +88,7 @@ userService.remove({ id: 1 });
 ```
 
 #### Response数据结构
-目前service里面默认处理是，依据报文success 字段来判断请求结果是否正常，如果是true则认为请求正常，且返回的是response的data字段，否则任务请求异常会走到catch，返回的是原始的response报文。如果服务端Response数据结构如service内部定义的骨架结构，可以通过全局interceptors来做一个Response数据结构转换成符合规则的结构。
+目前service里面默认处理是依据报文success 字段来判断请求结果是否正常，如果是true则认为请求正常，且返回的是response的data字段，否则任务请求异常会走到catch，返回的是原始的response报文。如果服务端Response数据结构如service内部定义的骨架结构，可以通过全局interceptors来做一个Response数据结构转换成符合规则的结构。
 ```
 {
     "success": true, // true 请求成功， false 请求异常

@@ -2,7 +2,6 @@
  * @file create services by config
  * @author zhangyou
  */
-import { stringify } from 'query-string';
 import jsonToFormData from 'json-form-data';
 import checkStatus from './checkStatus';
 import { getFullUrl, buildURL } from './utils';
@@ -64,14 +63,9 @@ export const generateOptions = (options, params, globalConfig = defaultConfig) =
 
         if (dataType === 'formdata') {
             return jsonToFormData(params);
-            // const fd = new FormData();
-            // Object.keys(params).map(key => {
-            //     fd.append(key, params[key]);
-            // });
-            // return fd;
         }
 
-        return stringify(params);
+        return JSON.stringify(params);
     };
 
     if (method.toUpperCase() !== 'GET') {
