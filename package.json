@@ -1,11 +1,12 @@
 {
   "name": "lib-service",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "create services by json config",
   "main": "lib/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "npx babel src --out-dir lib"
+    "build": "npx babel src --out-dir lib",
+    "postbuild": "cp src/*.d.ts ./lib"
   },
   "repository": {
     "type": "git",
