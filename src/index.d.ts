@@ -7,7 +7,7 @@ declare module 'lib-service' {
     ) => {
         [key: string]: (
             params: Record<string, any>
-        ) => typeof Promise
+        ) => Promise<any>
     }
 
     export default getServiceFactory
