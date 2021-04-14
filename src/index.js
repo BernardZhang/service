@@ -3,6 +3,7 @@
  * @author zhangyou
  */
 import jsonToFormData from 'json-form-data';
+import { stringify } from 'query-string';
 import checkStatus from './checkStatus';
 import { getFullUrl, buildURL } from './utils';
 import defaultConfig from './config';
@@ -65,7 +66,7 @@ export const generateOptions = (options, params, globalConfig = defaultConfig) =
             return jsonToFormData(params);
         }
 
-        return JSON.stringify(params);
+        return stringify(params);
     };
 
     if (method.toUpperCase() !== 'GET') {
@@ -152,7 +153,7 @@ export const createServices = (config, options = {}, globalConfig = defaultConfi
 
 			promise = promise.then((res = {}) => {
 				if (!res.success && +res.status === 302) {
-					location.href = redirectUrl;
+					location.href = typeof redirectUrl === 'function' ? redirectUrl(res) : redirectUrl;
                 }
                 if (res && res.success) {
                     return res.data;
