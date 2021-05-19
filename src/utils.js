@@ -22,7 +22,13 @@ export const buildURL = (config, params = {}, baseUrl = "") => {
 
     url = getFullUrl(url, baseUrl);
     // 替换url中动态参数如: /users/{id} => /users/1
-    url = url.replace(/{([^}]*)}/g, (str, key) => params[key]);
+    url = url.replace(/{([^}]*)}/g, (str, key) => {
+		if (typeof params[key] === 'object') {
+			return JSON.stringify(params[key]);
+		}
+
+		return params[key];
+	});
     // 替换url中动态参数如: /users/:id => /users/1
     url = url.replace(/\/:([^/]*)/g, (str, key) => `/${params[key]}`);
 

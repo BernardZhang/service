@@ -171,23 +171,29 @@ export const createServices = (config, options = {}, globalConfig = defaultConfi
 
             // 包装promise实例，重写then、catch方法，用来获取链式调用最后一个promise实例
 			// 从而实现错误处理的链式冒泡处理机制
-			const wrapePromise = () => {
-				let pthen = promise.then;
-				let pcatch = promise.catch;
+			const wrapPromise = () => {
+				let originalThen = promise.then;
+				let originalCatch = promise.catch;
+                let originalFinally = promise.finally;
 
 				promise.then = (...args) => {
-					promise = pthen.apply(promise, args);
-					return wrapePromise();
+					promise = originalThen.apply(promise, args);
+					return wrapPromise();
 				};
 
 				promise.catch = (...args) => {
-					promise = pcatch.apply(promise, args);
-					return wrapePromise();
+					promise = originalCatch.apply(promise, args);
+					return wrapPromise();
+				};
+
+				promise.finally = (...args) => {
+					promise = originalFinally.apply(promise, args);
+					return wrapPromise();
 				};
 
 				return promise;
 			};
-			promise = wrapePromise();
+			promise = wrapPromise();
         
             return promise;
         };
