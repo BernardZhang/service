@@ -18,9 +18,9 @@ export const getFullUrl = (url, baseUrl = '')  => {
 
 export const buildURL = (config, params = {}, baseUrl = "") => {
 	let { url, method } = config;
-    method = method || 'GET';
+    method = (method || 'GET').toUpperCase();
 
-    url = getFullUrl(url, baseUrl);
+    url = getFullUrl(url, config?.baseUrl || baseUrl);
     // 替换url中动态参数如: /users/{id} => /users/1
     url = url.replace(/{([^}]*)}/g, (str, key) => {
 		if (typeof params[key] === 'object') {
