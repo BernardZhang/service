@@ -17,13 +17,13 @@ const codeMessage = {
 };
 
 export default (response, config) => {
-    if (response.status >= 200 && response.status < 300) {
+	if (response.status >= 200 && response.status < 300) {
 		return response;
 	}
 	const errorMsg = codeMessage[response.status] || response.statusText;
 	const error = new Error(errorMsg);
-    error.name = response.status;
-    error.status = response.status;
+	error.name = response.status;
+	error.status = response.status;
 	error.response = response;
 
 	const statusHandle = config[error.status];
@@ -37,6 +37,12 @@ export default (response, config) => {
 
 		return error;
 	} else {
+		const { errorInterceptor } = config
+
+		if (errorInterceptor) {
+			return errorInterceptor(response, error);
+		}
+
 		throw error;
 	}
 };

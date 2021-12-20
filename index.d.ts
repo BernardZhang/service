@@ -1,8 +1,8 @@
 declare module "lib-service" {
   interface ServiceConfig {
     url: string;
-    dataType: "json" | "formdata" | "x-www-form-urlencoded";
-    method:
+    dataType?: "json" | "formdata" | "x-www-form-urlencoded";
+    method?:
       | "GET"
       | "POST"
       | "PUT"
@@ -13,10 +13,10 @@ declare module "lib-service" {
       | "put"
       | "delete"
       | "options";
-    headers: Object;
+    headers?: Object;
   }
 
-  function getServiceFactory(
+  export default function getServiceFactory(
     globalConfig: Record<string, any>
   ): <
     TConfig extends Record<string, ServiceConfig>,
@@ -25,6 +25,4 @@ declare module "lib-service" {
     config: TConfig,
     options?: { interceptors?: Array<unknown> }
   ) => Record<TName, <R = any>(params: Record<string, any>) => Promise<R>>;
-
-  export default getServiceFactory;
 }
