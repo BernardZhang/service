@@ -18,19 +18,19 @@ import defaultConfig from './config';
  * @return {Promise} 返回添加拦截器后新的promise对象
  */
 export const addInterceptors = (promise, interceptors, url) => {
-	interceptors.forEach(interceptor => {
-		if (interceptor instanceof Function) {
-			promise = promise.then(interceptor);
-		}
-		if (Object.prototype.toString.call(interceptor) === '[object Object]') {
+    interceptors.forEach(interceptor => {
+        if (interceptor instanceof Function) {
+            promise = promise.then(interceptor);
+        }
+        if (Object.prototype.toString.call(interceptor) === '[object Object]') {
             Object.entries(interceptor).forEach(([urlPattern, fun]) => {
-				if (new RegExp(urlPattern).test(url) && fun instanceof Function) {
-					promise = promise.then(fun);
-				}
-			});
-		}
-	});
-	return promise;
+                if (new RegExp(urlPattern).test(url) && fun instanceof Function) {
+                    promise = promise.then(fun);
+                }
+            });
+        }
+    });
+    return promise;
 };
 
 /**
@@ -63,7 +63,7 @@ export const generateOptions = (options, params, globalConfig = defaultConfig) =
         }
 
         if (dataType === 'formdata') {
-            return jsonToFormData(params);
+            return jsonToFormData(params, { mapping: value => value });
         }
 
         return stringify(params);
@@ -83,15 +83,15 @@ export const generateOptions = (options, params, globalConfig = defaultConfig) =
             headers: defaultHeaders,
             ...rest
         });
-        
+
         resultOptions.body = formatBody(resultOptions, params);
     }
 
     Object.assign(resultOptions, {
         headers: {
             ...(resultOptions.headers || {}),
-            ...(globalConfig.headers || {}),
-            ...headers
+            ...((globalConfig.headers instanceof Function ? globalConfig.headers() : globalConfig.headers) || {}),
+            ...((headers instanceof Function ? headers() : headers) || {})
         }
     });
 
@@ -110,15 +110,15 @@ export const generateOptions = (options, params, globalConfig = defaultConfig) =
 export const createServices = (config, options = {}, globalConfig = defaultConfig) => {
     const services = {};
     const {
-        baseUrl = '', 
+        baseUrl = '',
         redirectUrl,
         onError
     } = globalConfig;
-	let {
-		interceptors = []
-	} = options;
-    interceptors = interceptors instanceof Array ?  interceptors : [interceptors];
-    
+    let {
+        interceptors = []
+    } = options;
+    interceptors = interceptors instanceof Array ? interceptors : [interceptors];
+
     if (globalConfig.interceptors) {
         interceptors = [
             globalConfig.interceptors,
@@ -126,11 +126,11 @@ export const createServices = (config, options = {}, globalConfig = defaultConfi
         ];
     }
 
-	for (const key in config) {
+    for (const key in config) {
         const { url } = config[key];
 
-		services[key] = params => {
-			let promise = fetch(
+        services[key] = params => {
+            let promise = fetch(
                 buildURL(config[key], params, baseUrl),
                 generateOptions(config[key], params, globalConfig)
             ).then(
@@ -147,13 +147,13 @@ export const createServices = (config, options = {}, globalConfig = defaultConfi
                 }
             );
 
-			if (interceptors && interceptors.length) {
-				promise = addInterceptors(promise, interceptors, url);
+            if (interceptors && interceptors.length) {
+                promise = addInterceptors(promise, interceptors, url);
             }
 
-			promise = promise.then((res = {}) => {
-				if (!res.success && +res.status === 302) {
-					location.href = typeof redirectUrl === 'function' ? redirectUrl(res) : redirectUrl;
+            promise = promise.then((res = {}) => {
+                if (!res.success && +res.status === 302) {
+                    location.href = typeof redirectUrl === 'function' ? redirectUrl(res) : redirectUrl;
                 }
                 if (res && res.success) {
                     return res.data;
@@ -164,43 +164,43 @@ export const createServices = (config, options = {}, globalConfig = defaultConfi
                 const { errorHandle } = options;
                 promise.catch(onError || errorHandle || (err => {
                     console.warn(`request ${url} exception`, err);
-				    // message.error(err.message || '服务器未知错误');
-				    return;
+                    // message.error(err.message || '服务器未知错误');
+                    return;
                 }));
             });
 
             // 包装promise实例，重写then、catch方法，用来获取链式调用最后一个promise实例
-			// 从而实现错误处理的链式冒泡处理机制
-			const wrapPromise = () => {
-				let originalThen = promise.then;
-				let originalCatch = promise.catch;
+            // 从而实现错误处理的链式冒泡处理机制
+            const wrapPromise = () => {
+                let originalThen = promise.then;
+                let originalCatch = promise.catch;
                 let originalFinally = promise.finally;
 
-				promise.then = (...args) => {
-					promise = originalThen.apply(promise, args);
-					return wrapPromise();
-				};
+                promise.then = (...args) => {
+                    promise = originalThen.apply(promise, args);
+                    return wrapPromise();
+                };
 
-				promise.catch = (...args) => {
-					promise = originalCatch.apply(promise, args);
-					return wrapPromise();
-				};
+                promise.catch = (...args) => {
+                    promise = originalCatch.apply(promise, args);
+                    return wrapPromise();
+                };
 
-				promise.finally = (...args) => {
-					promise = originalFinally.apply(promise, args);
-					return wrapPromise();
-				};
+                promise.finally = (...args) => {
+                    promise = originalFinally.apply(promise, args);
+                    return wrapPromise();
+                };
 
-				return promise;
-			};
-			promise = wrapPromise();
-        
+                return promise;
+            };
+            promise = wrapPromise();
+
             return promise;
         };
         services[key].URL = new URL(getFullUrl(url, baseUrl));
-	}
+    }
 
-	return services;
+    return services;
 };
 
 /**
