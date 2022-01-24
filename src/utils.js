@@ -34,11 +34,14 @@ export const buildURL = (config, params = {}, baseUrl = "") => {
 		return params[key];
 	});
 	// 替换url中动态参数如: /users/:id => /users/1
-	url = url.replace(/\/:([^/]*)/g, (str, key) => `/${params[key]}`);
+	url = url.replace(/\/:([^/?]*)/g, (str, key) => {
+		pathParamsKeys.push(key);
+		return `/${params[key]}`;
+	});
 
 	if (method === "GET") {
 		url = new URL(url);
-		url.search = new URLSearchParams(
+		const searchParams = new URLSearchParams(
 			removeEmptyKey(
 				// 过滤掉path中动态参数
 				Object.entries(params).reduce(
@@ -51,7 +54,9 @@ export const buildURL = (config, params = {}, baseUrl = "") => {
 					{}
 				)
 			)
-		);
+		).toString();
+		url.search += (url.search && searchParams ? '&' : '') + searchParams;
+
 		return url.href;
 	}
 
