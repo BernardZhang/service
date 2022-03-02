@@ -10,9 +10,14 @@ export const removeEmptyKey = (params = {}) => {
 export const getFullUrl = (url, baseUrl = "") => {
 	const { protocol, host } = window.location;
 
+	if (/^http/i.test(baseUrl)) {
+		return `${baseUrl}${url}`;
+	}
+
 	if (!/^http/i.test(url)) {
 		url = `${protocol}//${host}${baseUrl}${url}`;
 	}
+
 	return url;
 };
 
