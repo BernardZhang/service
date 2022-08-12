@@ -24,5 +24,11 @@ declare module "lib-service" {
   >(
     config: TConfig,
     options?: { interceptors?: Array<unknown> }
-  ) => Record<TName, <R = any>(params?: Record<string, any>) => Promise<R>>;
+  ) => Record<
+    TName,
+    <R = any>(
+      params?: Record<string, any>,
+      options?: ServiceConfig
+    ) => Promise<R>
+  >;
 }

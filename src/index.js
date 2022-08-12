@@ -50,7 +50,15 @@ export const generateOptions = (options, params, globalConfig = defaultConfig) =
     } = options;
     const resultOptions = {
         credentials: 'include',
-        method: method.toUpperCase()
+        method: method.toUpperCase(),
+        ...['mode', 'cache', 'credentials'].reduce((acc, key) => {
+            if (globalConfig[key]) {
+                acc[key] = globalConfig[key]
+                return acc;
+            }
+            return acc
+        }, {}),
+        ...rest
     };
     const dataType = options.dataType || globalConfig.dataType;
     const formatBody = (options, params) => {
@@ -80,8 +88,7 @@ export const generateOptions = (options, params, globalConfig = defaultConfig) =
         }[dataType] || {};
 
         Object.assign(resultOptions, {
-            headers: defaultHeaders,
-            ...rest
+            headers: defaultHeaders
         });
 
         resultOptions.body = formatBody(resultOptions, params);
@@ -129,10 +136,10 @@ export const createServices = (config, options = {}, globalConfig = defaultConfi
     for (const key in config) {
         const { url } = config[key];
 
-        services[key] = params => {
+        services[key] = (params, options = {}) => {
             let promise = fetch(
                 buildURL(config[key], params, baseUrl),
-                generateOptions(config[key], params, globalConfig)
+                generateOptions(Object.assign({}, config[key], options), params, globalConfig)
             ).then(
                 res => checkStatus(res, globalConfig)
             ).then(
