@@ -1,6 +1,6 @@
 {
   "name": "lib-service",
-  "version": "0.2.25",
+  "version": "0.2.26",
   "description": "create services by json config",
   "main": "lib/index.js",
   "scripts": {

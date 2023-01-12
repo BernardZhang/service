@@ -4,7 +4,7 @@
  */
 import jsonToFormData from 'json-form-data';
 import { stringify } from 'query-string';
-import checkStatus from './checkStatus';
+import checkStatus, { codeMessage } from './checkStatus';
 import { getFullUrl, buildURL } from './utils';
 import defaultConfig from './config';
 
@@ -141,7 +141,7 @@ export const createServices = (config, options = {}, globalConfig = defaultConfi
                 buildURL(config[key], params, baseUrl),
                 generateOptions(Object.assign({}, config[key], options), params, globalConfig)
             ).then(
-                res => checkStatus(res, globalConfig)
+                res => checkStatus(res, globalConfig, service.lang)
             ).then(
                 response => {
                     const contentType = response?.headers?.get('content-type');
@@ -210,6 +210,7 @@ export const createServices = (config, options = {}, globalConfig = defaultConfi
     return services;
 };
 
+
 /**
  * 设置全局配置，并返回createServices方法
  *
@@ -217,7 +218,7 @@ export const createServices = (config, options = {}, globalConfig = defaultConfi
  * 
  * @return {Function} 返回createServices方法
  */
-export default globalConfig => (
+const service = globalConfig => (
     (config = {}, options = {}) => (
         createServices(
             config,
@@ -225,4 +226,12 @@ export default globalConfig => (
             Object.assign({}, defaultConfig, globalConfig)
         )
     )
-);
+)
+
+export function setLanguage(lang) {
+    if (codeMessage[lang]) {
+        service.lang = lang;
+    }
+}
+
+export default service;
