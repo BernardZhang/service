@@ -62,12 +62,14 @@ export const generateOptions = (options, params, globalConfig = defaultConfig) =
     };
     const dataType = options.dataType || globalConfig.dataType;
     const formatBody = (options, params) => {
+        params = options?.body || params
+
         if (params instanceof FormData) {
             return params;
         }
 
         if (dataType === 'json') {
-            return JSON.stringify(params);
+            return typeof params === 'string' ? params : JSON.stringify(params);
         }
 
         if (dataType === 'formdata') {
