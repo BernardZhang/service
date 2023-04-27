@@ -13,19 +13,21 @@ import defaultConfig from './config';
  * 给请求添加拦截器
  * @param {Promise} promise 请求promise实例
  * @param {Array} interceptors 拦截器数组
- * @param {String} url 当前请求的地址
+ * @param {Object} req 当前请求配置信息{ url, params, method ...}
  * 
  * @return {Promise} 返回添加拦截器后新的promise对象
  */
-export const addInterceptors = (promise, interceptors, url) => {
+export const addInterceptors = (promise, interceptors, req) => {
+    const { url } = req
+
     interceptors.forEach(interceptor => {
         if (interceptor instanceof Function) {
-            promise = promise.then(interceptor);
+            promise = promise.then(res => interceptor(res, req));
         }
         if (Object.prototype.toString.call(interceptor) === '[object Object]') {
             Object.entries(interceptor).forEach(([urlPattern, fun]) => {
                 if (new RegExp(urlPattern).test(url) && fun instanceof Function) {
-                    promise = promise.then(fun);
+                    promise = promise.then(res => fun(res, req));
                 }
             });
         }
@@ -157,7 +159,11 @@ export const createServices = (config, options = {}, globalConfig = defaultConfi
             );
 
             if (interceptors && interceptors.length) {
-                promise = addInterceptors(promise, interceptors, url);
+                promise = addInterceptors(promise, interceptors, {
+                    ...config[key],
+                    params,
+                    options,
+                });
             }
 
             promise = promise.then((res = {}) => {

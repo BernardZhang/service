@@ -129,18 +129,19 @@ const userService = createService({
         url: '/login'
     }
 }, {
-    interceptors: [
+    interceptors: [{
         // 匹配所有请求
-        '*': res => ({
+        '.*': res => ({
             ..res,
             data: res.result
         }),
+    }, {
         // 匹配 /users请求
         '/users': res => ({
             ...res,
             current: res.curPage
         })
-    ]
+    }]
 });
 
 userService.query({
